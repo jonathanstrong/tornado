@@ -684,15 +684,20 @@ class RequestHandler(object):
         wrapped in a dictionary.  More details at
         http://haacked.com/archive/2009/06/25/json-hijacking.aspx/ and
         https://github.com/facebook/tornado/issues/1009
+
+
+        #NOTE - I ALLOWED LISTS ON JAN 13, 2016 BECAUSE THIS IS FOR
+        AN INTERNAL PROJECT. SEE LINE 694
         """
         if self._finished:
             raise RuntimeError("Cannot write() after finish()")
-        if not isinstance(chunk, (bytes, unicode_type, dict)):
-            message = "write() only accepts bytes, unicode, and dict objects"
-            if isinstance(chunk, list):
-                message += ". Lists not accepted for security reasons; see http://www.tornadoweb.org/en/stable/web.html#tornado.web.RequestHandler.write"
+        if not isinstance(chunk, (bytes, unicode_type, dict, list, type(None))):
+            message = "write() only accepts bytes, unicode, and dict objects, not {} objects".format(type(chunk))
+            #import pdb; pdb.set_trace()
+            #if isinstance(chunk, list):
+            #    message += ". Lists not accepted for security reasons; see http://www.tornadoweb.org/en/stable/web.html#tornado.web.RequestHandler.write"
             raise TypeError(message)
-        if isinstance(chunk, dict):
+        if isinstance(chunk, (dict, list, type(None))):
             chunk = escape.json_encode(chunk)
             self.set_header("Content-Type", "application/json; charset=UTF-8")
         chunk = utf8(chunk)
